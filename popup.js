@@ -1,6 +1,3 @@
-const BASE_URL = 'https://www.fitbit.com';
-const API_URL = `${BASE_URL}/ajaxapi`;
-
 const getCsrfToken = (cb) => {
     chrome.tabs.getCurrent((tab) => {
         console.log(tab)

@@ -1,14 +1,23 @@
+// Config
+// -----------------------------------------------------------------------------
+
+const EXT_NAME = `fitbitCsvChromeExt`;
+const BASE_URL = 'https://www.fitbit.com';
+const API_URL = `${BASE_URL}/ajaxapi`;
+
+// Util
+// -----------------------------------------------------------------------------
+
 // Get a variable off the page's window, which can't be accessed directly
 function getWindowVar(variable) {
-    const dataAttrPrefix = 'fitbitCsvChromeExt';
-    const dataAttrName = `${dataAttrPrefix}_${variable}`;
+    const dataAttrName = `${EXT_NAME}_${variable}`;
 
     // Inject temp script to fetch window var and store it in a data attribute
     // on the body
     const scriptContent =
         `document.getElementsByTagName('body')[0].dataset['${dataAttrName}'] = window.${variable};`;
     const script = document.createElement('script');
-    script.id = `${dataAttrPrefix}_injectScript`;
+    script.id = `${EXT_NAME}_injectScript`;
     script.appendChild(document.createTextNode(scriptContent));
     document.body.appendChild(script);
 
@@ -23,8 +32,19 @@ function getWindowVar(variable) {
     return varVal;
 }
 
-function getCsrfToken2() {
+// Get Fitbit's CSRF token
+function getCsrfToken() {
     return getWindowVar('fitbitCsrfToken');
 }
 
-console.log('>>>', getCsrfToken2());
+// I/O
+// -----------------------------------------------------------------------------
+
+const log = console.log.bind(null, `[${EXT_NAME}]`);
+
+// Main
+// -----------------------------------------------------------------------------
+log(`Getting FitBit activity log from ${API_URL}...`);
+
+const csrfToken = getCsrfToken();
+log(`Aquired CSRF token: ${csrfToken}`);
