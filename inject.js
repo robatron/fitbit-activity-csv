@@ -37,10 +37,47 @@ function getCsrfToken() {
     return getWindowVar('fitbitCsrfToken');
 }
 
+// Network
+// -----------------------------------------------------------------------------
+
+function getActivityLog(apiUrl, csrfToken, callback, errorCallback) {
+    var x = new XMLHttpRequest();
+    x.open('POST', apiUrl);
+    x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    x.onload = () => { callback(x.response) };
+    x.onerror = () => { errorCallback('Network error.') };
+
+    const requestData = new FormData();
+    requestData.append('request', {
+        "serviceCalls": [
+            {
+                "id": "GET \/api\/2\/user\/activities\/logs",
+                "name": "user",
+                "method": "getActivitiesLogs",
+                "args": {
+                    "fromDate": "2017-02-26",
+                    "toDate": "2017-02-26",
+                    "period": "day",
+                    "offset": 0,
+                    "limit": 10
+                }
+            }
+        ],
+        "template": "activities\/modules\/models\/ajax.response.json.jsp"
+    });
+    requestData.append('csrfToken', csrfToken);
+
+    x.send(requestData);
+}
+
 // I/O
 // -----------------------------------------------------------------------------
 
-const log = console.log.bind(null, `[${EXT_NAME}]`);
+const logPrefix = `[${EXT_NAME}]`;
+const log = console.log.bind(null, logPrefix);
+const error = console.error.bind(null, logPrefix);
+const warn = console.warn.bind(null, logPrefix);
 
 // Main
 // -----------------------------------------------------------------------------
@@ -48,3 +85,9 @@ log(`Getting FitBit activity log from ${API_URL}...`);
 
 const csrfToken = getCsrfToken();
 log(`Aquired CSRF token: ${csrfToken}`);
+
+getActivityLog(API_URL, csrfToken, (response) => {
+    log(response);
+}, (errorMessage) => {
+    error(`Error getting activity log: ${errorMessage}`);
+});
