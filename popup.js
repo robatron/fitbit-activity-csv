@@ -1,6 +1,31 @@
 const BASE_URL = 'https://www.fitbit.com';
 const API_URL = `${BASE_URL}/ajaxapi`;
 
+const getCsrfToken = (cb) => {
+    chrome.tabs.getCurrent((tab) => {
+        console.log(tab)
+    })
+}
+
+function getWindowVar(variable) {
+    var varVal = {};
+
+    const scriptContent =
+        `if (typeof ${variable} !== 'undefined') document.getElementsByTagName('body')[0].dataset['tmp_${variable}'] = window.${variable};`;
+
+    var script = document.createElement('script');
+    script.id = 'tmpScript';
+    script.appendChild(document.createTextNode(scriptContent));
+    (document.body || document.head || document.documentElement).appendChild(script);
+
+    varVal = document.getElementsByTagName('body')[0].dataset[`tmp_${variable}`];
+
+    //$("body").removeAttr("tmp_" + variable);
+    //$("#tmpScript").remove();
+
+    return varVal;
+}
+
 function getActivityLog(apiUrl, callback, errorCallback) {
     var x = new XMLHttpRequest();
     x.open('POST', apiUrl);
@@ -44,6 +69,9 @@ function log(statusText) {
 
 document.addEventListener('DOMContentLoaded', function() {
     log(`Getting FitBit activity log from ${API_URL}...`);
+
+    getCsrfToken();
+    log(`Aquired CSRF token: `)
 
     getActivityLog(API_URL, function(response) {
         log(response);
