@@ -28,33 +28,32 @@ function getActivityLog(apiUrl, callback, errorCallback) {
     x.open('POST', apiUrl);
     x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 
-    x.onload = function() {
-        callback(x.response);
-    };
+    x.onload = () => { callback(x.response) }
+    x.onerror = () => { errorCallback('Network error.') }
 
-    x.onerror = function() {
-        errorCallback('Network error.');
-    };
-
-    const requestData = new FormData();
-    requestData.append('request', {
-        "serviceCalls": [
-            {
-                "id": "GET \/api\/2\/user\/activities\/logs",
-                "name": "user",
-                "method": "getActivitiesLogs",
-                "args": {
-                    "fromDate": "2017-02-26",
-                    "toDate": "2017-02-26",
-                    "period": "day",
-                    "offset": 0,
-                    "limit": 10
+    const requestObject = {
+        "request": {
+            "serviceCalls": [
+                {
+                    "id": "GET \/api\/2\/user\/activities\/logs",
+                    "name": "user",
+                    "method": "getActivitiesLogs",
+                    "args": {
+                        "fromDate": "2017-02-26",
+                        "toDate": "2017-02-26",
+                        "period": "day",
+                        "offset": 0,
+                        "limit": 10
+                    }
                 }
-            }
-        ],
-        "template": "activities\/modules\/models\/ajax.response.json.jsp"
-    });
-    requestData.append('csrfToken', '67CBA974-6166-1EC7-C7AA-140633DAC75B');
+            ],
+            "template": "activities\/modules\/models\/ajax.response.json.jsp"
+        },
+        "csrfToken": '67CBA974-6166-1EC7-C7AA-140633DAC75B'
+    };
+
+    const requestData = encodeURIComponent(JSON.stringify(requestObject));
+    log(requestData);
 
     x.send(requestData);
 }

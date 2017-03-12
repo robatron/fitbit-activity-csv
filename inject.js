@@ -41,32 +41,34 @@ function getCsrfToken() {
 // -----------------------------------------------------------------------------
 
 function getActivityLog(apiUrl, csrfToken, callback, errorCallback) {
-    var x = new XMLHttpRequest();
-    x.open('POST', apiUrl);
-    x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    const x = new XMLHttpRequest();
 
     x.onload = () => { callback(x.response) };
     x.onerror = () => { errorCallback('Network error.') };
 
-    const requestData = new FormData();
-    requestData.append('request', {
-        "serviceCalls": [
+    x.open('POST', apiUrl);
+    x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    const requestObj = {
+        serviceCalls: [
             {
-                "id": "GET \/api\/2\/user\/activities\/logs",
-                "name": "user",
-                "method": "getActivitiesLogs",
-                "args": {
-                    "fromDate": "2017-02-26",
-                    "toDate": "2017-02-26",
-                    "period": "day",
-                    "offset": 0,
-                    "limit": 10
+                id: 'GET /api/2/user/activities/logs',
+                name: 'user',
+                method: 'getActivitiesLogs',
+                args: {
+                    fromDate: '2017-03-11',
+                    toDate: '2017-02-26',
+                    period: 'day',
+                    offset: 0,
+                    limit: 10
                 }
             }
         ],
-        "template": "activities\/modules\/models\/ajax.response.json.jsp"
-    });
-    requestData.append('csrfToken', csrfToken);
+        template: 'activities/modules/models/ajax.response.json.jsp'
+    };
+    const requestData =
+        `request=${encodeURIComponent(JSON.stringify(requestObj))}&` +
+        `csrfToken=${encodeURIComponent(csrfToken)}`;
 
     x.send(requestData);
 }
