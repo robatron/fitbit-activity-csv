@@ -95,10 +95,30 @@ function getRunData() {
 
     log(`Getting FitBit activity log from ${API_URL} with ${serviceId}...`);
     getActivityLog(API_URL, serviceId, csrfToken, 100, (response) => {
-        const runResults = JSON.parse(response)[serviceId].result.filter(
-            activity => activity.name === 'Run'
-        );
+        const runResults = JSON.parse(response)[serviceId].result
+            .filter(
+                activity => activity.name === 'Run'
+            ).map(
+                run => {
+                    const focusedRunResult = {};
+                    [
+                        'dateTime',
+                        'distance',
+                        'formattedDuration',
+                        'durationHours',
+                        'durationMinutes',
+                        'durationSeconds',
+                        'steps',
+                        'calories',
+                    ].forEach(
+                        field => focusedRunResult[field] = run[field]
+                    );
+                    return focusedRunResult;
+                }
+            )
         log(runResults)
+
+
     }, (errorMessage) => {
         error(`Error getting activity log: ${errorMessage}`);
     });
