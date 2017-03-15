@@ -37,10 +37,14 @@ function getCsrfToken() {
     return getWindowVar('fitbitCsrfToken');
 }
 
+function formatDate(date) {
+    return date.toISOString().split('T')[0]
+}
+
 // Network
 // -----------------------------------------------------------------------------
 
-function getActivityLog(apiUrl, csrfToken, callback, errorCallback) {
+function getActivityLog(apiUrl, serviceId, csrfToken, resultCount, callback, errorCallback) {
     const x = new XMLHttpRequest();
 
     x.onload = () => { callback(x.response) };
@@ -52,15 +56,15 @@ function getActivityLog(apiUrl, csrfToken, callback, errorCallback) {
     const requestObj = {
         serviceCalls: [
             {
-                id: 'GET /api/2/user/activities/logs',
+                id: serviceId,
                 name: 'user',
                 method: 'getActivitiesLogs',
                 args: {
-                    fromDate: '2017-03-11',
-                    toDate: '2017-02-26',
+                    fromDate: formatDate(new Date()),
+                    toDate: formatDate(new Date()),
                     period: 'day',
                     offset: 0,
-                    limit: 10
+                    limit: resultCount
                 }
             }
         ],
@@ -83,13 +87,21 @@ const warn = console.warn.bind(null, logPrefix);
 
 // Main
 // -----------------------------------------------------------------------------
-log(`Getting FitBit activity log from ${API_URL}...`);
+function getRunData() {
+    const serviceId = 'GET /api/2/user/activities/logs';
 
-const csrfToken = getCsrfToken();
-log(`Aquired CSRF token: ${csrfToken}`);
+    const csrfToken = getCsrfToken();
+    log(`Aquired CSRF token: ${csrfToken}`);
 
-getActivityLog(API_URL, csrfToken, (response) => {
-    log(response);
-}, (errorMessage) => {
-    error(`Error getting activity log: ${errorMessage}`);
-});
+    log(`Getting FitBit activity log from ${API_URL} with ${serviceId}...`);
+    getActivityLog(API_URL, serviceId, csrfToken, 100, (response) => {
+        const runResults = JSON.parse(response)[serviceId].result.filter(
+            activity => activity.name === 'Run'
+        );
+        log(runResults)
+    }, (errorMessage) => {
+        error(`Error getting activity log: ${errorMessage}`);
+    });
+}
+
+getRunData();
