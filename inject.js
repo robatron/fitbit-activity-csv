@@ -17,7 +17,7 @@ function getWindowVar(variable) {
     const scriptContent =
         `document.getElementsByTagName('body')[0].dataset['${dataAttrName}'] = window.${variable};`;
     const script = document.createElement('script');
-    script.id = `${EXT_NAME}_injectScript`;
+    script.id = `${EXT_NAME}_injectScript_${Date.now()}`;
     script.appendChild(document.createTextNode(scriptContent));
     document.body.appendChild(script);
 
@@ -26,10 +26,20 @@ function getWindowVar(variable) {
 
     // Clean up
     document.body.removeAttribute(`data-${dataAttrName}`);
-    document.getElementById(script.id);
+    document.getElementById(script.id).remove();
 
     // Return var value
     return varVal;
+}
+
+// Set a variable on the page's window, which can't be accessed directly
+function setWindowVar(name, val) {
+    const scriptContent = `window.${name} = ${val}`;
+    const script = document.createElement('script');
+    script.id = `${EXT_NAME}_injectScript_${Date.now()}`;
+    script.appendChild(document.createTextNode(scriptContent));
+    document.body.appendChild(script);
+    document.getElementById(script.id).remove();
 }
 
 // Get Fitbit's CSRF token
