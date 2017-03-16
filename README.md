@@ -1,10 +1,49 @@
-# fitbit-activity-csv (WORK IN PROGRESS)
+# fitbit-activity-csv
+
+> Dumb little Chrome extension I wrote for myself to download a specific set of Fitbit activity data as a CSV file
+
+## Usage
+
+Enable this extension, visit https://www.fitbit.com/activities, then open the JavaScript console.
+
+## Configuration
+
+TBD
 
 ## Dev Notes
 
 ### AJAX API
 
-#### Annotated Example Response
+#### Example Request
+
+##### Request
+
+POST https://www.fitbit.com/ajaxapi
+
+##### Form Data
+
+```
+request: {
+  "serviceCalls": [
+    {
+      "id": "GET \/api\/2\/user\/activities\/logs",
+      "name": "user",
+      "method": "getActivitiesLogs",
+      "args": {
+        "fromDate": "2017-03-16",
+        "toDate": "2017-03-16",
+        "period": "day",
+        "offset": 0,
+        "limit": 500
+      }
+    }
+  ],
+  "template": "activities\/modules\/models\/ajax.response.json.jsp"
+}
+csrfToken: 67CBA974-6166-1EC7-C7AA-140633DAC75B
+```
+
+#### Example Response
 
 ```js
 {
