@@ -95,30 +95,56 @@ function getRunData() {
 
     log(`Getting FitBit activity log from ${API_URL} with ${serviceId}...`);
     getActivityLog(API_URL, serviceId, csrfToken, 100, (response) => {
-        const runResults = JSON.parse(response)[serviceId].result
-            .filter(
-                activity => activity.name === 'Run'
-            ).map(
-                run => {
-                    const focusedRunResult = {};
-                    [
-                        'dateTime',
-                        'distance',
-                        'formattedDuration',
-                        'durationHours',
-                        'durationMinutes',
-                        'durationSeconds',
-                        'steps',
-                        'calories',
-                    ].forEach(
-                        field => focusedRunResult[field] = run[field]
-                    );
-                    return focusedRunResult;
-                }
-            )
-        log(runResults)
 
+        // Result fields to include
+        const includedFields = [
+            'dateTime',
+            'distance',
+            'formattedDuration',
+            'durationHours',
+            'durationMinutes',
+            'durationSeconds',
+            'steps',
+            'calories',
+        ];
 
+        // Array of run results containing only included fields
+        const runResults = JSON.parse(response)[serviceId].result.filter(
+            activity => activity.name === 'Run'
+        ).map(
+            run => {
+                const focusedRunResult = {};
+                includedFields.forEach(
+                    field => focusedRunResult[field] = run[field]
+                );
+                return focusedRunResult;
+            }
+        );
+
+        // Sort results by datetime, ascending
+        runResults.sort((a, b) => {
+            if (a.dateTime < b.dateTime) return -1;
+            if (a.dateTime > b.dateTime) return 1;
+            return 0;
+        });
+
+        // Array of run results field values separated by commas
+        const runResultsCsvLines = runResults.map(
+            result => includedFields.map(
+                field => result[field]
+            ).join(',')
+        );
+
+        // Unshift header line
+        runResultsCsvLines.unshift(includedFields.join(','));
+
+        // Full results CSV string
+        const runResultsCsvString = runResultsCsvLines.join('\n');
+        const runResultsCsvLink = 'data:text/csv;charset=utf-8,' +
+            encodeURIComponent(runResultsCsvString)
+
+        log('CSV string:\n', runResultsCsvString);
+        log('CSV link:\n', runResultsCsvLink);
     }, (errorMessage) => {
         error(`Error getting activity log: ${errorMessage}`);
     });
