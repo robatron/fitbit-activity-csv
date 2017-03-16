@@ -4,6 +4,8 @@
 const EXT_NAME = `fitbitCsvChromeExt`;
 const BASE_URL = 'https://www.fitbit.com';
 const API_URL = `${BASE_URL}/ajaxapi`;
+const RESULT_COUNT = 500;
+const RESULT_START_DATE = '2017-01-29';
 
 // Util
 // -----------------------------------------------------------------------------
@@ -104,7 +106,7 @@ function getRunData() {
     log(`Aquired CSRF token: ${csrfToken}`);
 
     log(`Getting FitBit activity log from ${API_URL} with ${serviceId}...`);
-    getActivityLog(API_URL, serviceId, csrfToken, 100, (response) => {
+    getActivityLog(API_URL, serviceId, csrfToken, RESULT_COUNT, (response) => {
 
         // Result fields to include
         const includedFields = [
@@ -120,7 +122,10 @@ function getRunData() {
 
         // Array of run results containing only included fields
         const runResults = JSON.parse(response)[serviceId].result.filter(
-            activity => activity.name === 'Run'
+            activity => (
+                activity.name === 'Run' &&
+                activity.dateTime > RESULT_START_DATE
+            )
         ).map(
             run => {
                 const focusedRunResult = {};
